@@ -1,4 +1,17 @@
-app:
-  build: .
-  volumes:
-    - '$PWD:/app'
+version: '3.1'
+
+services:
+    cryptoats:
+      build: .
+      volumes:
+        - "$PWD:/app"
+      depends_on:
+        - db
+    db:
+        image: postgres:12
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: cryptoats
+        ports:
+            - 15432:5432
