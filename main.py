@@ -2,52 +2,29 @@ import signal
 import sys
 import threading
 
-from binance.client import Client
-from binance.websockets import BinanceSocketManager
 from decouple import config
-from strategies.margin import strat
-from twisted.internet import reactor
+from exchanges import binance
 
-client = Client(config('BINANCE_API_KEY'), config('BINANCE_API_SECRET'))
 symbol = config('DEFAULT_SYMBOL')
 
-
-def process_message(msg: dict) -> None:
-    if msg['e'] == 'error':
-        print(msg)
-        close_socket()
-    else:
-        strat(msg)
+exchange = binance.Binance(config('BINANCE_API_KEY'), config('BINANCE_API_SECRET'))
+client = exchange.get_client()
 
 
-def signal_handler(signal: int, frame: signal.frame) -> None:
+def signal_handler(signal: int, frame) -> None:
     print('\n' + '*' * 20, 'Closing WebSocket connection', '*' * 20)
-    print(type(frame))
-    close_socket()
+    exchange.close_socket()
     sys.exit(0)
-
-
-def close_socket() -> None:
-    bm.stop_socket(conn_key)
-    bm.close()
-    reactor.stop()
 
 
 if len(sys.argv) > 1:
     symbol = sys.argv[1]
 
+# Open socket for symbol
 print('*' * 20, f'Watch price for {symbol}', '*' * 20)
+exchange.start_symbol_ticker_socket(symbol)
 
-# Create manager
-bm = BinanceSocketManager(client)
-
-# Start symbol ticker socket
-conn_key = bm.start_symbol_ticker_socket(symbol, process_message)
-
-# Start the socket manager
-bm.start()
-
-# Listen for keyboard interrupt event
+# Listen for keyboard interrupt event to close socket
 signal.signal(signal.SIGINT, signal_handler)
 forever = threading.Event()
 forever.wait()
