@@ -12,8 +12,6 @@ class Binance(exchange.Exchange):
     def __init__(self, key: str, secret: str):
         exchange.Exchange.__init__(self, key, secret)
         self.client = Client(self.api_key, self.api_secret)
-        self.socketManager = None
-        self.socket = None
 
     def get_client(self):
         return self.client
