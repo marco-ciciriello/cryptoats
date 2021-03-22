@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
     db:
@@ -13,7 +13,7 @@ services:
     cryptoats:
       build: .
       volumes:
-        - '$PWD:/app'
+        - "$PWD:/app"
       depends_on:
         - db
       network_mode: host
