@@ -32,9 +32,9 @@ class Binance(exchange.Exchange):
         print(response)
         self.process(response)
 
-    def start_symbol_ticker_socket(self, symbol: str) -> None:
+    def start_symbol_socket(self, symbol: str) -> None:
         self.socketManager = self.get_socket_manager()
-        self.socket = self.socketManager.start_symbol_ticker_socket(symbol, self.process_message)
+        self.socket = self.socketManager.start_symbol_ticker_socket(symbol=symbol, callback=self.process_message)
         self.start_socket()
 
     def start_socket(self) -> None:

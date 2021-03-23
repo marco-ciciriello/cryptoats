@@ -2,8 +2,7 @@ import datetime
 import uuid
 
 from decouple import config
-from sqlalchemy import create_engine
-from sqlalchemy import Column, String, Float, DateTime, Boolean
+from sqlalchemy import Boolean, Column, create_engine, DateTime, Float, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
