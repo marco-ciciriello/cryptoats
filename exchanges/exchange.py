@@ -1,17 +1,40 @@
+from models import price
+
+
 class Exchange:
 
-    def __init__(self, key: str, secret: str) -> None:
+    currency: str
+    asset: str
+
+    def __init__(self, key: str, secret: str):
         self.api_key = key
         self.api_secret = secret
-
+        self.name = None
         self.client = None
         self.socketManager = None
         self.socket = None
-        self.symbol = None
+        self.currency = None
+        self.asset = None
         self.strategy = None
 
-    def set_symbol(self, symbol: str) -> None:
-        self.symbol = symbol
+    def get_symbol(self):
+        return self.currency + '_' + self.asset
 
-    def set_strategy(self, strategy) -> None:
+    def set_currency(self, symbol: str):
+        self.currency = symbol
+
+    def set_asset(self, symbol: str):
+        self.asset = symbol
+
+    def set_strategy(self, strategy):
         self.strategy = strategy
+
+    def process(self, msg):
+        if msg['e'] == 'error':
+            print(msg)
+            self.close_socket()
+        else:
+            self.strategy.run(
+                price.Price(pair=self.get_symbol(), currency=self.currency, asset=self.asset,  exchange=self.name,
+                            current=msg['b'], lowest=msg['l'], highest=msg['h'])
+            )
