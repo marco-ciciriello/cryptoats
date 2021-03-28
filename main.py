@@ -12,7 +12,7 @@ exchanges = config('EXCHANGES').split(',')
 mode: str = config('DEFAULT_MODE')
 strategy: str = config('DEFAULT_STRATEGY')
 trading_mode: str = config('DEFAULT_TRADING_MODE')
-interval: str = config('DEFAULT_TRADE_CANDLESTICK_INTERVAL')
+interval: int = int(config('DEFAULT_TRADE_CANDLESTICK_INTERVAL'))
 currency: str = config('DEFAULT_CURRENCY')
 asset: str = config('DEFAULT_ASSET')
 
@@ -22,14 +22,6 @@ if len(sys.argv) > 1:
     if len(symbol) > 1:
         currency = symbol[0]
         asset = symbol[1]
-
-
-def signal_handler(signal: int, frame) -> None:
-    print('\n' + '*' * 20, 'Closing WebSocket connection', '*' * 20)
-    if exchange.socket:
-        exchange.close_socket()
-        sys.exit(0)
-
 
 if trading_mode == 'real':
     print('*' * 20, 'CAUTION: TRADING MODE ACTIVATED', '*' * 20)
@@ -50,13 +42,13 @@ exchange.set_asset(asset)
 
 # Load strategy
 if strategy == 'debug':
-    exchange.set_strategy(debug.Debug(exchange, 10))
+    exchange.set_strategy(debug.Debug(exchange, interval))
 
 if strategy == 'watcher':
-    exchange.set_strategy(watcher.Watcher(exchange, 10))
+    exchange.set_strategy(watcher.Watcher(exchange, interval))
 
 if strategy == 'arbitrage':
-    exchange.set_strategy(arbitrage.Arbitrage(exchange, 10))
+    exchange.set_strategy(arbitrage.Arbitrage(exchange, interval))
 
 # Start mode
 print(f'{mode} mode on {exchange.get_symbol()} symbol')
@@ -67,11 +59,6 @@ if mode == 'trader':
 elif mode == 'live':
     exchange.start_symbol_ticker_socket(exchange.get_symbol())
 
-    # Listen for keyboard interrupt event to close socket
-    signal.signal(signal.SIGINT, signal_handler)
-    forever = threading.Event()
-    forever.wait()
-
 elif mode == 'backtest':
     period_start = config('DEFAULT_PERIOD_START')
     period_end = config('DEFAULT_PERIOD_END')
@@ -80,3 +67,23 @@ elif mode == 'backtest':
 
 else:
     print('Mode unsupported')
+
+
+def signal_handler(signal: int, frame) -> None:
+    if exchange.socket:
+        print('\n' + '*' * 20, 'Closing WebSocket connection', '*' * 20)
+        exchange.close_socket()
+        sys.exit(0)
+    else:
+        print('\n' + '*' * 20, 'Stopping strategy', '*' * 20)
+        exchange.strategy.stop()
+        sys.exit(0)
+
+
+# Listen for keyboard interrupt event to close socket
+signal.signal(signal.SIGINT, signal_handler)
+forever = threading.Event()
+forever.wait()
+
+
+

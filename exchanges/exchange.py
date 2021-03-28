@@ -1,4 +1,3 @@
-from models import price
 from strategies.strategy import Strategy
 
 

@@ -23,16 +23,14 @@ class Binance(exchange.Exchange):
         return BinanceSocketManager(self.client)
 
     def get_candle(self, interval=Client.KLINE_INTERVAL_1MINUTE):
-        response: object = self.client.get_klines(symbol=self.get_binance_symbol(),  interval=interval)
-        print(response)
+        return self.client.get_klines(symbol=self.get_binance_symbol(), interval=interval)
 
     def get_historical_candles(self, start: str, end=None, interval=Client.KLINE_INTERVAL_1MINUTE):
         for candle in self.client.get_historical_klines_generator(self.get_binance_symbol(), interval, start, end):
             print(candle)
 
     def ticker_symbol(self):
-        response = self.client.get_symbol_ticker(self.symbol)
-        self.process(response)
+        return self.client.get_symbol_ticker(symbol=self.get_binance_symbol())
 
     def start_symbol_socket(self, symbol: str):
         self.socketManager = self.get_socket_manager()
