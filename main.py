@@ -18,10 +18,11 @@ asset: str = config('DEFAULT_ASSET')
 
 # Parse symbol pair from first command argument
 if len(sys.argv) > 1:
-    symbol = sys.argv[1].split('_')
-    if len(symbol) > 1:
-        currency = symbol[0]
-        asset = symbol[1]
+    symbol = sys.argv[1]
+    currencies = sys.argv[1].split('_')
+    if len(currencies) > 1:
+        currency = currencies[0]
+        asset = currencies[1]
 
 if trading_mode == 'real':
     print('*' * 20, 'CAUTION: TRADING MODE ACTIVATED', '*' * 20)

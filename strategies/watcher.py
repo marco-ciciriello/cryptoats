@@ -12,6 +12,8 @@ class Watcher(Strategy):
         new_price = Price(pair=self.exchange.get_symbol(), currency=self.exchange.currency, asset=self.exchange.asset,
                           exchange=self.exchange.name, current=response['price'])
 
+        # print(self.exchange.get_asset_balance(self.exchange.currency))
+
         print('*******************************')
         print('Exchange: ', new_price.exchange)
         print('Pair: ', new_price.pair)
