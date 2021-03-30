@@ -10,6 +10,9 @@ class Coinbase(exchange.Exchange):
     def get_client(self):
         return self.client
 
+    def get_symbol(self):
+        return self.currency + '_to_' + self.asset
+
     def symbol_ticker(self):
-        response = self.client.exchange_rates(['usd_to_btc'])
-        self.process(response)
+        response = self.client.exchange_rates(self.get_symbol)
+        self.process_message(response)

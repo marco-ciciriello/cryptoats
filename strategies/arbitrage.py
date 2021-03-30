@@ -13,5 +13,5 @@ class Arbitrage(Strategy):
     def run(self):
             coin_data = []
             for coin in self.currencies:
-                response = self.exchange.get_client().get_symbol_ticker()
+                response = self.exchange.get_client().symbol_ticker()
                 print(response)

@@ -4,6 +4,7 @@ from binance.websockets import BinanceSocketManager
 from twisted.internet import reactor
 
 from exchanges import exchange
+from models.order import Order
 from models.price import Price
 
 
@@ -17,25 +18,25 @@ class Binance(exchange.Exchange):
     def get_client(self) -> Client:
         return self.client
 
-    def get_binance_symbol(self) -> str:
+    def get_symbol(self) -> str:
         return self.currency + self.asset
 
     def get_socket_manager(self) -> BinanceSocketManager:
         return BinanceSocketManager(self.client)
 
     def get_candle(self, interval=Client.KLINE_INTERVAL_1MINUTE):
-        return self.client.get_klines(symbol=self.get_binance_symbol(), interval=interval)
+        return self.client.get_klines(symbol=self.get_symbol(), interval=interval)
 
     def get_historical_candles(self, start: str, end=None, interval=Client.KLINE_INTERVAL_1MINUTE):
-        for candle in self.client.get_historical_klines_generator(self.get_binance_symbol(), interval, start, end):
+        for candle in self.client.get_historical_klines_generator(self.get_symbol(), interval, start, end):
             print(candle)
 
     def ticker_symbol(self):
-        return self.client.get_symbol_ticker(symbol=self.get_binance_symbol())
+        return self.client.get_symbol_ticker(symbol=self.get_symbol())
 
     def start_symbol_socket(self, symbol: str):
         self.socketManager = self.get_socket_manager()
-        self.socket = self.socketManager.start_symbol_ticker_socket(symbol=self.get_binance_symbol(),
+        self.socket = self.socketManager.start_symbol_ticker_socket(symbol=self.get_symbol(),
                                                                     callback=self.process_message)
         self.start_socket()
 
@@ -45,36 +46,36 @@ class Binance(exchange.Exchange):
     def get_asset_balance(self, currency):
         return self.client.get_asset_balance(currency)
 
-    def test_order(self, quantity, price, type=SIDE_BUY):
+    def test_order(self, order: Order):
         return self.client.create_test_order(
-            symbol=self.get_binance_symbol,
-            side=SIDE_BUY,
-            type=ORDER_TYPE_LIMIT,
-            timeInForce=TIME_IN_FORCE_GTC,
-            quantity=quantity,
-            price=price
+            symbol=order.symbol,
+            side=order.side,
+            type=order.type,
+            time_in_force=TIME_IN_FORCE_GTC,
+            quantity=order.quantity,
+            price=order.price
         )
 
-    def order(self, quantity, price, type=SIDE_BUY):
+    def order(self, order: Order):
         return self.client.create_order(
-            symbol=self.get_binance_symbol,
-            side=type,
-            type=ORDER_TYPE_LIMIT,
-            timeInForce=TIME_IN_FORCE_GTC,
-            quantity=quantity,
-            price=price
+            symbol=order.symbol,
+            side=order.side,
+            type=order.type,
+            time_in_force=TIME_IN_FORCE_GTC,
+            quantity=order.quantity,
+            price=order.price
         )
 
     def check_order(self, order_id):
-        return Client.get_order(
-            symbol=self.get_binance_symbol,
-            orderId=order_id
+        return self.client.get_order(
+            symbol=self.get_symbol,
+            order_id=order_id
         )
 
     def cancel_order(self, order_id):
-        return Client.cancel_order(
-            symbol=self.get_binance_symbol,
-            orderId=order_id
+        return self.client.cancel_order(
+            symbol=self.get_symbol,
+            order_id=order_id
         )
 
     def start_socket(self):
