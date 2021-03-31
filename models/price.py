@@ -1,11 +1,16 @@
-class Price:
-    def __init__(self, uuid='', pair='', exchange='', current=0, lowest=0, highest=0, currency='', asset='', created=''):
-        self.uuid = uuid
-        self.pair = pair
-        self.exchange = exchange
-        self.current = current
-        self.lowest = lowest
-        self.highest = highest
-        self.currency = currency
-        self.asset = asset
-        self.created = created
+from models.model import AbstractModel
+
+
+class Price(AbstractModel):
+
+    uuid = ''
+    pair: str = ''
+    exchange: str = ''
+    current: float = 0
+    lowest: float = 0
+    highest: float = 0
+    currency: str = ''
+    asset: str = ''
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)

@@ -1,12 +1,11 @@
-from decouple import config
+from models import AbstractModel
 
 
-class Currency:
+class Currency(AbstractModel):
 
-    __tablename__ = 'currency'
+    name: str = ''
+    symbol: str = ''
+    fiat: bool
 
-    uuid = ''
-    name = ''
-    symbol = ''
-    fiat = ''
-    created = ''
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)

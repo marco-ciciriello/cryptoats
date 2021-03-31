@@ -11,7 +11,7 @@ from models.price import Price
 class Binance(exchange.Exchange):
 
     def __init__(self, key: str, secret: str):
-        exchange.Exchange.__init__(self, key, secret)
+        super().__init__(key, secret)
         self.client = Client(self.api_key, self.api_secret)
         self.name = self.__class__.__name__
 
