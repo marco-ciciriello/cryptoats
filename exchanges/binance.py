@@ -31,8 +31,10 @@ class Binance(exchange.Exchange):
         for candle in self.client.get_historical_klines_generator(self.get_symbol(), interval, start, end):
             print(candle)
 
-    def ticker_symbol(self):
-        return self.client.get_symbol_ticker(symbol=self.get_symbol())
+    def symbol_ticker(self):
+        response = self.client.get_symbol_ticker(symbol=self.get_symbol())
+        return Price(pair=self.get_symbol(), currency=self.currency, asset=self.asset, exchange=self.name,
+                     current=response['price'])
 
     def start_symbol_socket(self, symbol: str):
         self.socketManager = self.get_socket_manager()
@@ -44,7 +46,8 @@ class Binance(exchange.Exchange):
         return self.client.get_account()
 
     def get_asset_balance(self, currency):
-        return self.client.get_asset_balance(currency)
+        response = self.client.get_asset_balance(currency)
+        return response['free']
 
     def test_order(self, order: Order):
         return self.client.create_test_order(

@@ -2,6 +2,7 @@ import threading
 import time
 
 from decouple import config
+
 from models.order import Order
 
 
@@ -61,6 +62,7 @@ class Strategy(object):
 
     def order(self, order: Order):
         print(order)
+
         if self.test:
             exchange_order = self.exchange.test_order(order)
         else:

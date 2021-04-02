@@ -5,7 +5,7 @@ import threading
 from decouple import config
 
 from exchanges import binance, coinbase, coingecko, exchange
-from strategies import arbitrage, debug, watcher
+from strategies import arbitrage, debug, test, watcher
 
 exchange_name = config('DEFAULT_EXCHANGE')
 exchanges = config('EXCHANGES').split(',')
@@ -50,6 +50,9 @@ if strategy == 'watcher':
 
 if strategy == 'arbitrage':
     exchange.set_strategy(arbitrage.Arbitrage(exchange, interval))
+
+if strategy == 'test':
+    exchange.set_strategy(test.Test(exchange, interval))
 
 # Start mode
 print(f'{mode} mode on {exchange.get_symbol()} symbol')
