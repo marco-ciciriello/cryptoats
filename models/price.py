@@ -3,7 +3,6 @@ from models.model import AbstractModel
 
 class Price(AbstractModel):
 
-    uuid = ''
     pair: str = ''
     exchange: str = ''
     current: float = 0
@@ -14,3 +13,7 @@ class Price(AbstractModel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.pair = self.get_pair()
+
+    def get_pair(self):
+        return self.currency + '_' + self.asset

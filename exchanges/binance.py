@@ -33,8 +33,8 @@ class Binance(exchange.Exchange):
 
     def symbol_ticker(self):
         response = self.client.get_symbol_ticker(symbol=self.get_symbol())
-        return Price(pair=self.get_symbol(), currency=self.currency, asset=self.asset, exchange=self.name,
-                     current=response['price'])
+        return Price(pair=self.get_symbol(), currency=self.currency.lower(), asset=self.asset.lower(),
+                     exchange=self.name.lower(), current=response['price'])
 
     def start_symbol_socket(self, symbol: str):
         self.socketManager = self.get_socket_manager()
@@ -49,8 +49,8 @@ class Binance(exchange.Exchange):
         response = self.client.get_asset_balance(currency)
         return response['free']
 
-    def test_order(self, order: Order):
-        return self.client.create_test_order(
+    def order(self, order: Order):
+        return self.client.create_order(
             symbol=order.symbol,
             side=order.side,
             type=order.type,
@@ -59,8 +59,8 @@ class Binance(exchange.Exchange):
             price=order.price
         )
 
-    def order(self, order: Order):
-        return self.client.create_order(
+    def test_order(self, order: Order):
+        return self.client.create_test_order(
             symbol=order.symbol,
             side=order.side,
             type=order.type,

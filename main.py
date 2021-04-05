@@ -18,7 +18,6 @@ asset: str = config('DEFAULT_ASSET')
 
 # Parse symbol pair from first command argument
 if len(sys.argv) > 1:
-    symbol = sys.argv[1]
     currencies = sys.argv[1].split('_')
     if len(currencies) > 1:
         currency = currencies[0]
@@ -66,7 +65,7 @@ elif mode == 'live':
 elif mode == 'backtest':
     period_start = config('DEFAULT_PERIOD_START')
     period_end = config('DEFAULT_PERIOD_END')
-    print(f'Backtest mode on {symbol} symbol for period from {period_start} to {period_end} with {interval} candlesticks.')
+    print(f'Backtest mode on {exchange.get_symbol()} symbol for period from {period_start} to {period_end} with {interval} candlesticks.')
     exchange.get_historical_candles(period_start, period_end, interval)
 
 else:
