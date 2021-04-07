@@ -1,7 +1,9 @@
+import datetime
+
 from binance.client import Client
 from binance.enums import *
 from binance.websockets import BinanceSocketManager
-from twisted.internet import reactor
+from math import floor
 
 from exchanges import exchange
 from models.order import Order
@@ -24,26 +26,20 @@ class Binance(exchange.Exchange):
     def get_socket_manager(self) -> BinanceSocketManager:
         return BinanceSocketManager(self.client)
 
-    def get_candle(self, interval=Client.KLINE_INTERVAL_1MINUTE):
-        return self.client.get_klines(symbol=self.get_symbol(), interval=interval)
-
-    def get_historical_candles(self, start: str, end=None, interval=Client.KLINE_INTERVAL_1MINUTE):
-        for candle in self.client.get_historical_klines_generator(self.get_symbol(), interval, start, end):
-            print(candle)
-
     def symbol_ticker(self):
         response = self.client.get_symbol_ticker(symbol=self.get_symbol())
         return Price(pair=self.get_symbol(), currency=self.currency.lower(), asset=self.asset.lower(),
                      exchange=self.name.lower(), current=response['price'])
 
-    def start_symbol_socket(self, symbol: str):
-        self.socketManager = self.get_socket_manager()
-        self.socket = self.socketManager.start_symbol_ticker_socket(symbol=self.get_symbol(),
-                                                                    callback=self.process_message)
-        self.start_socket()
+    def symbol_ticker_candle(self, interval=Client.KLINE_INTERVAL_1MINUTE):
+        return self.client.get_klines(symbol=self.get_symbol(), interval=interval)
 
-    def get_account(self):
-        return self.client.get_account()
+    def historical_symbol_ticker_candle(self, start: datetime, end=None, interval=Client.KLINE_INTERVAL_1MINUTE):
+        if isinstance(interval, int):
+            interval = str(floor(interval/60)) + 'm'
+        print(interval)
+        for candle in self.client.get_historical_klines_generator(self.get_symbol(), interval, start.strftime('%Y-%m-%dT%H:%M:%SZ'), end):
+            print(candle)
 
     def get_asset_balance(self, currency):
         response = self.client.get_asset_balance(currency)
@@ -81,16 +77,7 @@ class Binance(exchange.Exchange):
             order_id=order_id
         )
 
-    def start_socket(self):
-        print('*' * 20, 'Starting WebSocket connection', '*' * 20)
-        self.socketManager.start()
-
-    def close_socket(self):
-        self.socketManager.stop_socket(self.socket)
-        self.socketManager.close()
-        reactor.stop()
-
-    def process_message(self, msg):
+    def websocket_event_handler(self, msg):
         if msg['e'] == 'error':
             print(msg)
             self.close_socket()

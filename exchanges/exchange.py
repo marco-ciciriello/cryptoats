@@ -1,7 +1,13 @@
+import datetime
+
+from abc import ABC, abstractmethod
+from twisted.internet import reactor
+
+from models.order import Order
 from strategies.strategy import Strategy
 
 
-class Exchange:
+class Exchange(ABC):
 
     currency: str
     asset: str
@@ -18,9 +24,6 @@ class Exchange:
         self.asset = ''
         self.strategy = None
 
-    def get_symbol(self):
-        return self.currency + '_' + self.asset
-
     def set_currency(self, symbol: str):
         self.currency = symbol
 
@@ -29,3 +32,88 @@ class Exchange:
 
     def set_strategy(self, strategy: Strategy):
         self.strategy = strategy
+
+    def backtest(self, start, end, interval=60):
+        # Load dataset
+        # Iterate on candle to run strategy
+        print('Backtesting not yet implemented')
+
+    # Abstract methods
+
+    # Override to set current exchange symbol pair notation (default with _ separator currency_asset e.g. gbp_btc)
+    @abstractmethod
+    def get_symbol(self):
+        return self.currency + '_' + self.asset
+
+    # Override if current exchange supports WebSockets
+    @abstractmethod
+    def start_symbol_ticker_socket(self, symbol: str):
+        pass
+
+    # Override if current exchange supports WebSockets
+    @abstractmethod
+    def get_socket_manager(self, purchase):
+        pass
+
+    # Get current symbol ticker
+    @abstractmethod
+    def symbol_ticker(self):
+        pass
+
+    # Get current symbol ticker candle for given interval
+    @abstractmethod
+    def symbol_ticker_candle(self, interval):
+        pass
+
+    # Get current symbol historic value
+    @abstractmethod
+    def historical_symbol_ticker_candle(self, start: datetime, end=None, interval=60):
+        pass
+
+    # Get balance for a given currency
+    @abstractmethod
+    def get_asset_balance(self, currency):
+        pass
+
+    # Create an exchange order
+    @abstractmethod
+    def order(self, order: Order):
+        pass
+
+    # Create an exchange test order
+    @abstractmethod
+    def test_order(self, order: Order):
+        pass
+
+    # Check an exchange order status
+    @abstractmethod
+    def check_order(self, order_id):
+        pass
+
+    # Cancel an exchange order
+    @abstractmethod
+    def cancel_order(self, order_id):
+        pass
+
+    # WebSocket related methods
+
+    @abstractmethod
+    def websocket_event_handler(self, msg):
+        pass
+
+    def start_symbol_ticker_socket(self, symbol: str):
+        self.socketManager = self.get_socket_manager()
+        self.socket = self.socketManager.start_symbol_ticker_socket(
+            symbol=self.get_symbol(),
+            callback=self.websocket_event_handler
+        )
+        self.start_socket()
+
+    def start_socket(self):
+        print('Starting WebSocket connection...')
+        self.socketManager.start()
+
+    def close_socket(self):
+        self.socketManager.stop_socket(self.socket)
+        self.socketManager.close()
+        reactor.stop()

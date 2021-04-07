@@ -1,11 +1,13 @@
+import datetime
 import signal
 import sys
 import threading
 
+from dateutil.relativedelta import relativedelta
 from decouple import config
 
 from exchanges import binance, coinbase, coingecko, exchange
-from strategies import arbitrage, debug, test, watcher
+from strategies import arbitrage, debug, watcher
 
 exchange_name = config('DEFAULT_EXCHANGE')
 exchanges = config('EXCHANGES').split(',')
@@ -44,19 +46,22 @@ exchange.set_asset(asset)
 if strategy == 'debug':
     exchange.set_strategy(debug.Debug(exchange, interval))
 
-if strategy == 'watcher':
+elif strategy == 'watcher':
     exchange.set_strategy(watcher.Watcher(exchange, interval))
 
-if strategy == 'arbitrage':
+elif strategy == 'arbitrage':
     exchange.set_strategy(arbitrage.Arbitrage(exchange, interval))
 
-if strategy == 'test':
+elif strategy == 'test':
     exchange.set_strategy(test.Test(exchange, interval))
+
+else:
+    print('Strategy not found')
 
 # Start mode
 print(f'{mode} mode on {exchange.get_symbol()} symbol')
 
-if mode == 'trader':
+if mode == 'trade':
     exchange.strategy.start()
 
 elif mode == 'live':
@@ -66,10 +71,17 @@ elif mode == 'backtest':
     period_start = config('DEFAULT_PERIOD_START')
     period_end = config('DEFAULT_PERIOD_END')
     print(f'Backtest mode on {exchange.get_symbol()} symbol for period from {period_start} to {period_end} with {interval} candlesticks.')
-    exchange.get_historical_candles(period_start, period_end, interval)
+    exchange.backtest(period_start, period_end, interval)
+
+elif mode == 'import':
+    period_start = config('DEFAULT_PERIOD_START')
+    period_end = config('DEFAULT_PERIOD_END')
+    print(f'Import mode on {exchange.get_symbol()} symbol for period from {period_start} to {period_end} with {interval} candlesticks.')
+    start = datetime.datetime.now() + relativedelta(months=-6)
+    print(exchange.historical_symbol_ticker_candle(start, period_end, interval))
 
 else:
-    print('Mode unsupported')
+    print('Mode not found')
 
 
 def signal_handler(signal: int, frame) -> None:
