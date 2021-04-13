@@ -1,22 +1,21 @@
-import datetime
 import signal
 import sys
 import threading
 
-from dateutil.relativedelta import relativedelta
 from decouple import config
 
 from exchanges import binance, coinbase, coingecko, exchange
-from strategies import arbitrage, debug, watcher
+from services.importer import Importer
+from strategies import arbitrage, debug, logger, runner
 
-exchange_name = config('DEFAULT_EXCHANGE')
+exchange_name = config('EXCHANGE')
 exchanges = config('EXCHANGES').split(',')
-mode: str = config('DEFAULT_MODE')
-strategy: str = config('DEFAULT_STRATEGY')
-trading_mode: str = config('DEFAULT_TRADING_MODE')
-interval: int = int(config('DEFAULT_TRADE_CANDLESTICK_INTERVAL'))
-currency: str = config('DEFAULT_CURRENCY')
-asset: str = config('DEFAULT_ASSET')
+mode: str = config('MODE')
+strategy: str = config('STRATEGY')
+trading_mode: str = config('TRADING_MODE')
+interval: int = int(config('CANDLESTICK_INTERVAL'))
+currency: str = config('CURRENCY')
+asset: str = config('ASSET')
 
 # Parse symbol pair from first command argument
 if len(sys.argv) > 1:
@@ -46,14 +45,14 @@ exchange.set_asset(asset)
 if strategy == 'debug':
     exchange.set_strategy(debug.Debug(exchange, interval))
 
-elif strategy == 'watcher':
-    exchange.set_strategy(watcher.Watcher(exchange, interval))
-
 elif strategy == 'arbitrage':
     exchange.set_strategy(arbitrage.Arbitrage(exchange, interval))
 
-elif strategy == 'test':
-    exchange.set_strategy(test.Test(exchange, interval))
+elif strategy == 'logger':
+    exchange.set_strategy(logger.Logger(exchange, interval))
+
+elif strategy == 'runner':
+    exchange.set_strategy(runner.Runner(exchange, interval))
 
 else:
     print('Strategy not found')
@@ -68,17 +67,17 @@ elif mode == 'live':
     exchange.start_symbol_ticker_socket(exchange.get_symbol())
 
 elif mode == 'backtest':
-    period_start = config('DEFAULT_PERIOD_START')
-    period_end = config('DEFAULT_PERIOD_END')
-    print(f'Backtest mode on {exchange.get_symbol()} symbol for period from {period_start} to {period_end} with {interval} candlesticks.')
+    period_start = config('PERIOD_START')
+    period_end = config('PERIOD_END')
+    print(f'Backtest mode on {exchange.get_symbol()} symbol for period from {period_start} to {period_end} with {interval} second candlesticks.')
     exchange.backtest(period_start, period_end, interval)
 
 elif mode == 'import':
-    period_start = config('DEFAULT_PERIOD_START')
-    period_end = config('DEFAULT_PERIOD_END')
-    print(f'Import mode on {exchange.get_symbol()} symbol for period from {period_start} to {period_end} with {interval} candlesticks.')
-    start = datetime.datetime.now() + relativedelta(months=-6)
-    print(exchange.historical_symbol_ticker_candle(start, period_end, interval))
+    period_start = config('PERIOD_START')
+    period_end = config('PERIOD_END')
+    print(f'Import mode on {exchange.get_symbol()} symbol for period from {period_start} to {period_end} with {interval} second candlesticks.')
+    importer = Importer(exchange, period_start, period_end, interval)
+    importer.process()
 
 else:
     print('Mode not found')
