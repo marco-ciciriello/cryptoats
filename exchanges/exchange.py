@@ -34,11 +34,6 @@ class Exchange(ABC):
     def set_strategy(self, strategy: Strategy):
         self.strategy = strategy
 
-    def backtest(self, start, end, interval=60):
-        # Load dataset
-        # Iterate on candle to run strategy
-        print('Backtesting not yet implemented')
-
     def compute_symbol_pair(self):
         return utils.format_pair(self.currency, self.asset)
 

@@ -34,16 +34,16 @@ exchangeModule = importlib.import_module('exchanges.' + exchange_name, package=N
 exchangeClass = getattr(exchangeModule, exchange_name[0].upper() + exchange_name[1:])
 exchange = exchangeClass(config(exchange_name.upper()+'_API_KEY'), config(exchange_name.upper()+'_API_SECRET'))
 
-# Load currencies
-exchange.set_currency(currency)
-exchange.set_asset(asset)
-
 # Load strategy
 strategyModule = importlib.import_module('strategies.' + strategy, package=None)
 strategyClass = getattr(strategyModule, strategy[0].upper() + strategy[1:])
 exchange.set_strategy(strategyClass(exchange, interval))
 
-# Start mode
+# Load currencies
+exchange.set_currency(currency)
+exchange.set_asset(asset)
+
+# Mode
 print(f'{mode} mode on {exchange.get_symbol()} symbol')
 
 if mode == 'trade':
@@ -56,7 +56,12 @@ elif mode == 'backtest':
     period_start = config('PERIOD_START')
     period_end = config('PERIOD_END')
     print(f'Backtest mode on {exchange.get_symbol()} symbol for period from {period_start} to {period_end} with {interval} second candlesticks.')
-    exchange.backtest(period_start, period_end, interval)
+
+    for price in exchange.historical_symbol_ticker_candle(period_start, period_end, interval):
+        exchange.strategy.set_price(price)
+        exchange.strategy.run()
+
+    sys.exit()
 
 elif mode == 'import':
     period_start = config('PERIOD_START')
@@ -80,10 +85,7 @@ def signal_handler(signal: int, frame) -> None:
         sys.exit(0)
 
 
-# Listen for keyboard interrupt event to close socket
+# Listen for keyboard interrupt event
 signal.signal(signal.SIGINT, signal_handler)
 forever = threading.Event()
 forever.wait()
-
-
-
