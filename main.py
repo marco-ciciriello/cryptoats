@@ -16,17 +16,17 @@ interval: int = int(config('CANDLESTICK_INTERVAL'))
 currency: str = config('CURRENCY')
 asset: str = config('ASSET')
 
+if trading_mode == 'real':
+    print('*' * 20, 'CAUTION: TRADING MODE ACTIVATED', '*' * 20)
+else:
+    print('*' * 20, 'Test mode', '*' * 20)
+
 # Parse symbol pair from first command argument
 if len(sys.argv) > 1:
     currencies = sys.argv[1].split('_')
     if len(currencies) > 1:
         currency = currencies[0]
         asset = currencies[1]
-
-if trading_mode == 'real':
-    print('*' * 20, 'CAUTION: TRADING MODE ACTIVATED', '*' * 20)
-else:
-    print('*' * 20, 'Test mode', '*' * 20)
 
 # Load exchange
 print('*' * 20, f'Connecting to {exchange_name.upper()}', '*' * 20)

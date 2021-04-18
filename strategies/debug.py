@@ -10,6 +10,5 @@ class Debug(Strategy):
         super().__init__(exchange, timeout, *args, **kwargs)
 
     def run(self):
-        self.get_price()
         print(datetime.now().time())
         sleep(10)
