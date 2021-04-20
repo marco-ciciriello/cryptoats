@@ -30,14 +30,14 @@ if len(sys.argv) > 1:
 
 # Load exchange
 print('*' * 20, f'Connecting to {exchange_name.upper()}', '*' * 20)
-exchangeModule = importlib.import_module('exchanges.' + exchange_name, package=None)
-exchangeClass = getattr(exchangeModule, exchange_name[0].upper() + exchange_name[1:])
-exchange = exchangeClass(config(exchange_name.upper()+'_API_KEY'), config(exchange_name.upper()+'_API_SECRET'))
+exchange_module = importlib.import_module('exchanges.' + exchange_name, package=None)
+exchange_class = getattr(exchange_module, exchange_name[0].upper() + exchange_name[1:])
+exchange = exchange_class(config(exchange_name.upper()+'_API_KEY'), config(exchange_name.upper()+'_API_SECRET'))
 
 # Load strategy
-strategyModule = importlib.import_module('strategies.' + strategy, package=None)
-strategyClass = getattr(strategyModule, strategy[0].upper() + strategy[1:])
-exchange.set_strategy(strategyClass(exchange, interval))
+strategy_module = importlib.import_module('strategies.' + strategy, package=None)
+strategy_class = getattr(strategy_module, strategy[0].upper() + strategy[1:])
+exchange.set_strategy(strategy_class(exchange, interval))
 
 # Load currencies
 exchange.set_currency(currency)
