@@ -4,6 +4,7 @@ from models.model import AbstractModel
 
 class Price(AbstractModel):
 
+    dataset: str = ''
     pair: str = ''
     exchange: str = ''
     current: float = 0.0
@@ -19,3 +20,11 @@ class Price(AbstractModel):
 
     def get_pair(self):
         return utils.format_pair(self.currency, self.asset)
+
+    def get_resource_name(self):
+        return 'prices'
+
+    def serialise(self, data: dict):
+        return {**self.__dict__, **data, 'currency': '/api/currencies/' + self.currency,
+                'asset': '/api/currencies/' + self.asset, 'exchange': '/api/exchanges/' + self.exchange,
+                'dataset': '/api/datasets/' + self.dataset}
