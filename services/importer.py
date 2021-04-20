@@ -19,7 +19,7 @@ class Importer:
 
     def process(self):
         for price in self.exchange.historical_symbol_ticker_candle(self.period_start, self.period_end, self.interval):
-            print(self.persist(price).json())
+            print(self.persist_price(price))
 
         execution_time = datetime.now() - self.start
         print('Execution time:', str(execution_time.total_seconds()), 'seconds')
@@ -27,26 +27,26 @@ class Importer:
 
     # Persist price on internal API
     def persist_price(self, price: Price):
-        try:
-            data = price.__dict__
-            data['currency'] = '/api/currencies/' + data['currency']
-            data['asset'] = '/api/currencies/' + data['asset']
-            data['exchange'] = '/api/exchanges/' + data['exchange']
-            data['dataset'] = '/api/datasets/' + self.dataset.uuid
-            response = self.rest.post('prices', data=data)
-            return response
-        except Exception as e:
-            pass
+        data = price.__dict__
+        data['currency'] = '/api/currencies/' + data['currency']
+        data['asset'] = '/api/currencies/' + data['asset']
+        data['exchange'] = '/api/exchanges/' + data['exchange']
+        data['dataset'] = '/api/datasets/' + self.dataset['uuid']
+        response = self.rest.post('prices', data=data)
+
+        return response.json()
 
     # Persist dataset on internal API
     def persist_dataset(self):
         try:
-            data = {'currency': '/api/currencies/' + self.exchange.currency,
-                    'asset': '/api/currencies/' + self.exchange.asset,
-                    'exchange': '/api/exchanges/' + self.exchange.name,
+            data = {'currency': '/api/currencies/' + self.exchange.currency.lower(),
+                    'asset': '/api/currencies/' + self.exchange.asset.lower(),
+                    'exchange': '/api/exchanges/' + self.exchange.name.lower(),
                     'periodStart': self.period_start,
                     'periodEnd': self.period_end}
             response = self.rest.post('datasets', data=data)
-            return response
+
+            return response.json()
+            
         except Exception as e:
             pass
