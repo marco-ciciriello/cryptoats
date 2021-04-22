@@ -27,5 +27,5 @@ class Runner(Strategy):
         print('Price:', self.price.current)
 
         # Persist price
-        response = self.price.persist()
+        response = self.price.create()
         print(response)
