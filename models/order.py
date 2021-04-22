@@ -3,6 +3,8 @@ from models.model import AbstractModel
 
 class Order(AbstractModel):
 
+    resource_name = 'orders'
+
     BUY = 'BUY'
     SELL = 'SELL'
 
@@ -26,6 +28,3 @@ class Order(AbstractModel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-    def get_resource_name(self):
-        return 'orders'
