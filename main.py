@@ -66,7 +66,7 @@ elif mode == 'backtest':
 
     print(dataset)
 
-    if dataset[0]:
+    if dataset and len(dataset) > 0 and dataset[0]:
         print('Dataset found.')
         price = Price()
         for prices in price.query('get', {'dataset': dataset[0]['uuid']}):
