@@ -16,8 +16,6 @@ class Order(AbstractModel):
     TYPE_TAKE_PROFIT_LIMIT = 'TAKE_PROFIT_LIMIT'
     TYPE_LIMIT_MAKER = 'LIMIT_MAKER'
 
-    uuid = ''
-    side: str = ''
     type: str = TYPE_LIMIT
     symbol: str = ''
     currency: str = ''

@@ -10,7 +10,6 @@ class Dataset(AbstractModel):
 
     resource_name = 'datasets'
 
-    uuid: str = ''
     pair: str = ''
     exchange: str = ''
     period_start: datetime
