@@ -61,8 +61,13 @@ elif mode == 'backtest':
           {interval} second candlesticks.')
 
     # Try to find dataset
-    dataset = Dataset().query('get', {'exchange': exchange.name.lower(), 'currency': currency.lower(), 'asset': asset.lower(),
-                              'period_start': period_start, 'period_end': period_end, 'candleSize': interval})
+    dataset = Dataset().query('get', {'exchange': '/api/exchanges/' + exchange.name.lower(), 
+                              'currency': '/api/currency/' + currency.lower(), 
+                              'asset': '/api/currency/' + asset.lower(),
+                              'period_start': period_start, 
+                              'period_end': period_end, 
+                              'candleSize': interval}
+                              )
 
     print(dataset)
 
