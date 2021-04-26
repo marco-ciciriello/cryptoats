@@ -18,6 +18,7 @@ class Price(AbstractModel):
     volume: float = 0.0
     currency: str = ''
     asset: str = ''
+    dataset: str = ''
     openAt: str
 
     relations = {'exchange': Exchange, 'currency': Currency, 'asset': Currency, 'dataset': Dataset}

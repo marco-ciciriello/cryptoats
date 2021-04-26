@@ -17,6 +17,7 @@ class Strategy(ABC):
     price: Price
 
     def __init__(self, exchange, interval=60, *args, **kwargs):
+        self.exchange = exchange
         self._timer = None
         self.interval = interval
         self.args = args
@@ -25,7 +26,6 @@ class Strategy(ABC):
         self.next_call = time.time()
         self.portfolio = {}
         self.test = bool(config('TRADING_MODE') != self.TRADING_MODE_REAL)
-        self.exchange = exchange
 
     def _run(self):
         self.is_running = False

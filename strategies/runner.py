@@ -17,15 +17,21 @@ class Runner(Strategy):
         self.waiting_order = False
         self.fulfilled_orders = []
         self.last_price = 0
+        # Create dataset for session
+        self.dataset = Dataset().create(
+            data={'exchange': self.exchange.name.lower(), 'periodStart': datetime.now(), 'candleSize': 60,
+                  'currency': self.exchange.currency, 'asset': self.exchange.asset})
 
     def run(self):
         print('*******************************')
         print('Exchange:', self.exchange.name)
         print('Pair:', self.exchange.get_symbol())
-        print('Available: ', self.exchange.get_asset_balance(self.exchange.currency) + ' ' + self.exchange.currency)
-        print('Available: ', self.exchange.get_asset_balance(self.exchange.currency) + ' ' + self.exchange.asset)
+        print('Available:', self.exchange.get_asset_balance(self.exchange.currency), self.exchange.currency)
+        print('Available:', self.exchange.get_asset_balance(self.exchange.currency), self.exchange.asset)
         print('Price:', self.price.current)
 
         # Persist price
-        response = self.price.create()
+        print(self.dataset)
+        print(self.price)
+        response = self.price.create(data={'dataset': self.dataset.uuid})
         print(response)

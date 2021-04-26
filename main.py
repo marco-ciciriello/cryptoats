@@ -34,16 +34,16 @@ if len(sys.argv) > 1:
 print('*' * 20, f'Connecting to {exchange_name.upper()}', '*' * 20)
 exchange_module = importlib.import_module('exchanges.' + exchange_name, package=None)
 exchange_class = getattr(exchange_module, exchange_name[0].upper() + exchange_name[1:])
-exchange = exchange_class(config(exchange_name.upper()+'_API_KEY'), config(exchange_name.upper()+'_API_SECRET'))
-
-# Load strategy
-strategy_module = importlib.import_module('strategies.' + strategy, package=None)
-strategy_class = getattr(strategy_module, strategy[0].upper() + strategy[1:])
-exchange.set_strategy(strategy_class(exchange, interval))
+exchange = exchangeClass(config(exchange_name.upper() + '_API_KEY'), config(exchange_name.upper() + '_API_SECRET'))
 
 # Load currencies
 exchange.set_currency(currency)
 exchange.set_asset(asset)
+
+# Load strategy
+strategyModule = importlib.import_module('strategies.' + strategy, package=None)
+strategyClass = getattr(strategyModule, strategy[0].upper() + strategy[1:])
+exchange.set_strategy(strategyClass(exchange, interval))
 
 # Mode
 print(f'{mode} mode on {exchange.get_symbol()} symbol')
@@ -61,20 +61,19 @@ elif mode == 'backtest':
           {interval} second candlesticks.')
 
     # Try to find dataset
-    dataset = Dataset().query('get', {'exchange': exchange.name, 'currency': currency.lower(), 'asset': asset.lower(),
+    dataset = Dataset().query('get', {'exchange': exchange.name.lower(), 'currency': currency.lower(), 'asset': asset.lower(),
                               'period_start': period_start, 'period_end': period_end, 'candleSize': interval})
 
     print(dataset)
 
     if dataset and len(dataset) > 0:
-        print('Dataset found.')
+        print(dataset[0])
         price = Price()
-        for prices in price.query('get', {'dataset': dataset}):
-            for price in prices:
-                newPrice = Price()
-                newPrice.populate(price)
-                exchange.strategy.set_price(newPrice)
-                exchange.strategy.run()
+        for price in price.query('get', {'dataset': dataset[0]['uuid']}):
+            newPrice = Price()
+            newPrice.populate(price)
+            exchange.strategy.set_price(newPrice)
+            exchange.strategy.run()
     else:
         print(f'Dataset not found, external API call to {exchange.name}.')
         for price in exchange.historical_symbol_ticker_candle(period_start, period_end, interval):
@@ -110,3 +109,5 @@ def signal_handler(signal: int, frame) -> None:
 signal.signal(signal.SIGINT, signal_handler)
 forever = threading.Event()
 forever.wait()
+exchange.strategy.stop()
+sys.exit(0)
